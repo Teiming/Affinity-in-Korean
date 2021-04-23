@@ -1,33 +1,41 @@
-echo "번역할 프로그램을 선택합니다."
+echo "Check Update"
+cd ~/github/Affin.ko/
+git pull
+echo "Select Application"
 echo "1: Affinity Designer"
 echo "2: Affinity Photo"
 echo "3: Affinity Publisher"
-read app
-case ${app} in
+read Application
+case ${Application} in
   1 )
-  APPNAME=Affinity\ Designer
+  APPNAME="Designer"
   ;;
   2 )
-  APPNAME=Affinity\ Photo
+  APPNAME="Photo"
   ;;
   3 )
-  APPNAME=Affinity\ Publisher
+  APPNAME="Publisher"
   ;;
   * )
-  echo "알 수 없는 프로그램입니다. 1, 2, 3(으)로만 입력해주세요."
-  ~/Affin.ko/Step-2.command
+  echo "Unknown Application."
   ;;
 esac
 
-echo ${APPNAME}"를 변환합니다."
-sudo plutil -convert xml1 /Applications/"${APPNAME}".app/Contents/Resources/en.lproj/*
-sudo plutil -convert xml1 /Applications/"${APPNAME}".app/Contents/Resources/ja.lproj/*
-sudo plutil -convert xml1 /Applications/"${APPNAME}".app/Contents/Frameworks/libcocoaui.framework/Versions/A/Resources/en.lproj/*
-sudo plutil -convert xml1 /Applications/"${APPNAME}".app/Contents/Frameworks/libcocoaui.framework/Versions/A/Resources/ja.lproj/*
-echo "ko.lproj 폴더를 생성합니다."
-sudo mkdir /Applications/"${APPNAME}".app/Contents/Resources/ko.lproj
-sudo mkdir /Applications/"${APPNAME}".app/Contents/Frameworks/libcocoaui.framework/Versions/A/Resources/ko.lproj
-echo "ko.lproj 폴더의 권한을 부여합니다."
-sudo chown ${USERNAME} /Applications/"${APPNAME}".app/Contents/Resources/ko.lproj
-sudo chown ${USERNAME} /Applications/"${APPNAME}".app/Contents/Frameworks/libcocoaui.framework/Versions/A/Resources/ko.lproj
-exit
+echo "Select Main Menu or Frameworks"
+echo "1: Main Menu"
+echo "2: Frameworks"
+read Frameworks
+if [[ ${Frameworks} -eq 2 ]]; then
+  SUPPATH=/Applications/Affinity\ ${APPNAME}.app/Contents/Frameworks/libcocoaui.framework/Versions/A/Resources/
+else
+  SUPPATH=/Applications/Affinity\ ${APPNAME}.app/Contents/Resources/
+fi
+
+FILECOUNT=$(ls -a "${SUPPATH}ja.lproj/" | grep "i" | sed -n "=" | tail -n "1")
+for (( i = 1; i <= ${FILECOUNT}; i++ ))
+do
+  NAME=$(ls "${JAPPATH}" | sed -n "${i}p")
+  echo "${i}/${FILECOUNT} ${NAME}"
+  sudo sed -f "~/github/Affin.ko/Dictionary/"${APPNAME} "${SUPPATH}en.lproj/${NAME}" > "${SUPPATH}ko.lproj/${NAME}"
+  echo " (번역 종료)"
+done

@@ -1,0 +1,35 @@
+#!/bin/sh
+APPVERS="1.9.1"
+APPPATH=/Applications/Affinity\ Designer.app/Contents/Frameworks/libcocoaui.framework/Versions/A/Resources
+ENGPATH=${APPPATH}/en.lproj
+JAPPATH=${APPPATH}/ja.lproj
+KORPATH=${APPPATH}/ko.lproj
+MIDPATH=~/Affin.ko-translated/Affinity\ Designer\ \ Frameworks
+# array 생성
+nib=("AdjustmentPage" "Adjustments" "AppearancePage" "AssignICCProfilePanel" "BatchJobItemView"
+"BatchPage" "ChannelsPage" "CharacterPage" "CloneBrushSourcesPage" "ConvertDocumentPanel"
+"DevelopBasicPage" "DevelopCameraPage" "DevelopDetailsPage" "DevelopLensPage" "DevelopOverlaysPage"
+"DevelopSnapshotsPage" "DevelopTonesPage" "EffectsPage" "EffectsSettings" "ExportableItemsPage"
+"ExportablePathView" "ExportableScalePathView" "ExportLayerPage" "ExportListConflicts"
+"ExpressionConstantsView" "FieldsPage" "FindAndReplacePage" "FontManagerWindowController"
+"GeolocationViewController" "GuidesWindowController" "HistoryPage" "IndexFindResultsViewController"
+"KeyboardShortcutWindowController" "LoadOptionsWindow" "MacroPage" "MergeTableFormats"
+"MergeTextStyles" "NewBatchPanel" "NewFocusMergePanel" "NewHDRMergePanel" "NewPanoramaPanel"
+"NewStackPanel" "OpenTypeWindowController" "PageSetupWindowController" "PlaceToolSourcesPage"
+"PreflightPage" "ProceduralTexture" "SelectDocument" "SpellingWindowController" "SpreadPropertiesWindowController"
+"TableFormatEditor" "TelemetryWindowController" "TextStyleEditor" "TextStylesPage"
+"ToneMapOverlaysPage" "ToneMapPage" "XMPPage")
+# 변환
+for (( i = 0; i < ${#nib[@]}; i++ )); do
+  echo "Converting ${nib[i]}.nib"
+  ENGFILE=${ENGPATH}/${nib[i]}.nib
+  JAPFILE=${JAPPATH}/${nib[i]}.nib
+  KORFILE=${KORPATH}/${nib[i]}.nib
+  MIDFILE=${MIDPATH}/${nib[i]}.nib
+  sudo plutil -convert xml1 "${JAPFILE}/keyedobjects.nib"
+  sudo diff "${ENGFILE}" "${JAPFILE}/keyedobjects.nib" | grep "<string>" > ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.en-ja.log
+  sudo diff ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.en-ja.log ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.en-ko.log | grep "<string>" > ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.ja-ko.log
+  echo " (log 파일 생성)"
+  git add ~/Affin.ko/Diff/
+  git commit -m "Affinity Designer ${APPVERS} ${nib[i]}.nib Updated (jlog)"
+done

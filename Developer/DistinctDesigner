@@ -1,0 +1,42 @@
+#!/bin/sh
+APPVERS="1.9.1"
+APPPATH=/Applications/Affinity\ Designer.app/Contents/Frameworks/libcocoaui.framework/Versions/A/Resources
+ENGPATH=${APPPATH}/en.lproj
+JAPPATH=${APPPATH}/ja.lproj
+KORPATH=${APPPATH}/ko.lproj
+MIDPATH=~/Affin.ko-translated/Affinity\ Designer\ \ Frameworks
+# array 생성
+nib=("AnchorsPage" "AstroStackFilesPage" "AstroStackResultsPage"
+"DataMergeManagerWindowController" "HyperlinkPage" "IndexPage"
+"LayerPage" "PackageDocumentWindowController" "ParagraphPage"
+"Preferences" "ResourceManagerWindowController" "SectionsWindowController"
+"SnapshotsPage" "TextFramePage" "TocPage"
+"UserStatusView" "WorkspacePresetWindowController")
+# 변환
+for (( i = 0; i < ${#nib[@]}; i++ )); do
+  echo -n "Converting ${nib[i]}"
+  ENGFILE=${ENGPATH}/${nib[i]}.nib
+  JAPFILE=${JAPPATH}/${nib[i]}.nib
+  KORFILE=${KORPATH}/${nib[i]}.nib
+  MIDFILE=${MIDPATH}/${nib[i]}.nib
+  sudo plutil -convert xml1 "${ENGFILE}/keyedobjects.nib"
+  sudo plutil -convert xml1 "${JAPFILE}/keyedobjects.nib"
+  sudo rm -dr "${MIDFILE}"
+  sudo mkdir "${MIDFILE}"
+  sudo chmod 777 "${MIDFILE}"
+  sudo sed -f ~/Affin.ko/DictionaryDesigner "${ENGFILE}/keyedobjects.nib" > "${MIDFILE}/keyedobjects.nib"
+  echo " (en에서 mid-kr로)"
+  sudo diff "${ENGFILE}" "${JAPFILE}" | grep "<string>" > ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.en-ja.log
+  sudo diff "${ENGFILE}" "${MIDFILE}" | grep "<string>" > ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.en-ko.log
+  sudo diff ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.en-ja.log ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.en-ko.log | grep "<string>" > ~/Affin.ko/Diff/Affinity\ Designer/Frameworks/${nib[i]}.nib.ja-ko.log
+  echo " (log 파일 생성)"
+  git add ~/Affin.ko/Diff/
+  git commit -m "Affinity Designer ${APPVERS} ${nib[i]}.nib/ Updated"
+done
+sudo rm -dr "${MIDPATH}/.DS_Store"
+sudo rm -dr "${MIDPATH}/Preferences.nib"
+sudo rsync -av --delete "${MIDPATH}/" "${KORPATH}/"
+echo " (mid-kr에서 kr로)"
+
+sudo chmod +x ~/Affin.ko/jlog.DistinctDesigner
+sudo ~/Affin.ko/jlog.DistinctDesigner
